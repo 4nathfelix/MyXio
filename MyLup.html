@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Stev ❤️</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: #0a0a0a;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  /* =====================
+     MUSIC PLAYER (FIXED)
+  ===================== */
+  .music-player {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    background: rgba(20,5,10,0.95);
+    border: 1px solid rgba(255,80,120,0.45);
+    border-radius: 50px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 28px rgba(255,80,120,0.2);
+    min-width: 230px;
+  }
+  .music-vinyl {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%,
+      #1a1a1a 28%, #ff5078 29%, #ff5078 44%,
+      #1a1a1a 45%, #1a1a1a 59%, #ff5078 60%, #ff5078 74%,
+      #1a1a1a 75%);
+    animation: spin 3s linear infinite;
+    animation-play-state: paused;
+    flex-shrink: 0;
+  }
+  .music-vinyl.playing { animation-play-state: running; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .music-info { flex: 1; overflow: hidden; }
+  .music-title {
+    font-size: 12px;
+    color: #ff8099;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: sans-serif;
+    font-weight: 500;
+  }
+  .music-artist {
+    font-size: 10px;
+    color: #777;
+    font-family: sans-serif;
+    margin-top: 2px;
+  }
+  .music-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,80,120,0.6);
+    background: transparent;
+    color: #ff8099;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .music-btn:hover { background: #ff5078; color: #fff; border-color: #ff5078; }
+
+  /* ========================
+     SECTION 1 — HERO
+  ======================== */
+  #section1 {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 60%, #1a0514 0%, #0a0a0a 70%);
+  }
+
+  /* Stars */
+  .stars { position: absolute; inset: 0; pointer-events: none; }
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle var(--d, 3s) var(--del, 0s) infinite ease-in-out;
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: 0.15; transform: scale(1); }
+    50%      { opacity: 1;    transform: scale(1.6); }
+  }
+
+  /* Floating hearts background */
+  .floating-hearts-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .fheart {
+    position: absolute;
+    font-size: var(--s, 20px);
+    opacity: 0;
+    bottom: -50px;
+    animation: floatUp var(--d, 8s) var(--delay, 0s) infinite ease-in;
+    color: rgba(255,80,120,0.35);
+  }
+  @keyframes floatUp {
+    0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.25; }
+    100% { opacity: 0; transform: translateY(-110vh) rotate(720deg); }
+  }
+
+  /* Big ghost heart */
+  .big-heart {
+    position: absolute;
+    bottom: -15%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 65vw;
+    line-height: 1;
+    opacity: 0.03;
+    pointer-events: none;
+    animation: bigPulse 5s ease-in-out infinite;
+    user-select: none;
+  }
+  @keyframes bigPulse {
+    0%,100% { transform: translateX(-50%) scale(1); }
+    50%      { transform: translateX(-50%) scale(1.06); }
+  }
+
+  /* Hero text */
+  .hero-content {
+    text-align: center;
+    z-index: 2;
+    padding: 2rem;
+    max-width: 720px;
+  }
+  .hero-tagline {
+    font-size: 12px;
+    letter-spacing: 5px;
+    color: #ff8099;
+    text-transform: uppercase;
+    margin-bottom: 1.4rem;
+    font-family: sans-serif;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+  .hero-title {
+    font-size: clamp(2.6rem, 8.5vw, 5.2rem);
+    line-height: 1.1;
+    font-weight: normal;
+    color: #fff;
+    margin-bottom: 1.4rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.6s forwards;
+    text-shadow: 0 0 60px rgba(255,80,120,0.2);
+  }
+  .hero-title span { color: #ff5078; }
+  .hero-subtitle {
+    font-size: clamp(0.95rem, 2.8vw, 1.25rem);
+    color: #bbb;
+    line-height: 1.9;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+    font-style: italic;
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 34px;
+    border: 1px solid #ff5078;
+    border-radius: 50px;
+    color: #ff5078;
+    text-decoration: none;
+    font-family: sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    cursor: pointer;
+    background: transparent;
+    opacity: 0;
+    animation: fadeUp 1s 1.2s forwards;
+  }
+  .hero-cta:hover { background: #ff5078; color: #fff; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(255,80,120,0.3); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scroll hint */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: fadeInOut 2.2s ease-in-out infinite;
+  }
+  @keyframes fadeInOut { 0%,100% { opacity: 0.25; } 50% { opacity: 0.75; } }
+  .scroll-hint span { font-size: 10px; color: #ff8099; letter-spacing: 3px; font-family: sans-serif; }
+  .scroll-arrow {
+    width: 20px; height: 32px;
+    border: 1.5px solid rgba(255,80,120,0.6);
+    border-radius: 10px;
+    position: relative;
+  }
+  .scroll-arrow::after {
+    content: '';
+    position: absolute;
+    width: 4px; height: 8px;
+    background: #ff5078;
+    border-radius: 2px;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: scrollDot 1.6s ease-in-out infinite;
+  }
+  @keyframes scrollDot {
+    0%   { top: 5px; opacity: 1; }
+    100% { top: 15px; opacity: 0; }
+  }
+
+  /* ======================
+     SECTION 2 — GALLERY
+  ====================== */
+  #section2 {
+    min-height: 100vh;
+    padding: 7rem 2rem 5rem;
+    background: linear-gradient(180deg, #0a0a0a 0%, #100310 50%, #0a0a0a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .section-header { text-align: center; margin-bottom: 4rem; }
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 5px;
+    color: #ff5078;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    margin-bottom: 0.9rem;
+  }
+  .section-title {
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    color: #fff;
+    margin-bottom: 1rem;
+    font-weight: normal;
+  }
+  .section-quote {
+    font-size: 1.05rem;
+    color: #888;
+    font-style: italic;
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  /* Heart-shaped collage */
+  .heart-clip-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4rem;
+  }
+
+  .heart-deco-svg {
+    position: absolute;
+    width: 420px;
+    height: 380px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .heart-collage {
+    position: relative;
+    width: 380px;
+    height: 360px;
+  }
+
+  /* Each photo card in collage */
+  .heart-photo {
+    position: absolute;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(255,80,120,0.5);
+    transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+    cursor: pointer;
+    animation: hFloat var(--fd, 6s) var(--fdel, 0s) ease-in-out infinite;
+  }
+  .heart-photo:hover {
+    transform: scale(1.1) translateY(-5px) !important;
+    box-shadow: 0 10px 36px rgba(255,80,120,0.55);
+    border-color: #ff5078;
+    z-index: 20;
+  }
+  @keyframes hFloat {
+    0%,100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+    50%      { transform: translateY(-9px) rotate(var(--rot, 0deg)); }
+  }
+  .heart-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Placeholder when no image */
+  .heart-photo .ph {
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #1a0818, #10030a);
+    border: 1px dashed rgba(255,80,120,0.2);
+    color: #666;
+    font-family: sans-serif;
+    font-size: 10px;
+  }
+  .heart-photo .ph .icon { font-size: 22px; opacity: 0.6; }
+
+  /* Love quote cards */
+  .love-quotes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 700px;
+  }
+  .quote-card {
+    background: rgba(255,80,120,0.04);
+    border: 1px solid rgba(255,80,120,0.18);
+    border-radius: 18px;
+    padding: 1.6rem 1.4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.35s, border-color 0.35s, box-shadow 0.35s;
+  }
+  .quote-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(255,80,120,0.1) 0%, transparent 65%);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .quote-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255,80,120,0.45);
+    box-shadow: 0 8px 32px rgba(255,80,120,0.12);
+  }
+  .quote-card:hover::after { opacity: 1; }
+  .quote-icon { font-size: 30px; margin-bottom: 12px; display: block; }
+  .quote-text {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.75;
+    font-style: italic;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Heart SVG animated path */
+  .heart-deco-path {
+    stroke: rgba(255,80,120,0.35);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-dasharray: 10 7;
+    animation: dashMove 18s linear infinite;
+  }
+  @keyframes dashMove { to { stroke-dashoffset: -200; } }
+
+  /* ======================
+     SECTION 3 — VIDEO
+  ====================== */
+  #section3 {
+    min-height: 100vh;
+    padding: 6rem 2rem;
+    background: radial-gradient(ellipse at 50% 40%, #05080f 0%, #0a0a0a 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .video-section-header { text-align: center; margin-bottom: 3rem; }
+
+  .video-frame-outer {
+    position: relative;
+    width: 100%;
+    max-width: 740px;
+  }
+
+  /* Animated corner ornaments */
+  .frame-corner {
+    position: absolute;
+    width: 58px; height: 58px;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .frame-corner svg { width: 100%; height: 100%; }
+  .frame-corner.tl { top: -10px; left: -10px; }
+  .frame-corner.tr { top: -10px; right: -10px; transform: scaleX(-1); }
+  .frame-corner.bl { bottom: -10px; left: -10px; transform: scaleY(-1); }
+  .frame-corner.br { bottom: -10px; right: -10px; transform: scale(-1); }
+
+  .corner-path {
+    stroke: #ff5078;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-dasharray: 130;
+    stroke-dashoffset: 130;
+    animation: drawCorner 1.4s ease forwards, cornerGlow 2.5s 1.4s ease-in-out infinite;
+  }
+  @keyframes drawCorner { to { stroke-dashoffset: 0; } }
+  @keyframes cornerGlow {
+    0%,100% { stroke: #ff5078; filter: none; }
+    50%      { stroke: #ff90b0; filter: drop-shadow(0 0 4px rgba(255,80,120,0.6)); }
+  }
+
+  /* Cute stickers around video */
+  .sticker {
+    position: absolute;
+    font-size: var(--ss, 30px);
+    z-index: 6;
+    pointer-events: none;
+    animation: wiggle var(--ssd, 2.2s) var(--ssdel, 0s) ease-in-out infinite;
+    transform-origin: center center;
+  }
+  @keyframes wiggle {
+    0%,100% { transform: rotate(var(--sr, -12deg)) scale(1); }
+    50%      { transform: rotate(calc(var(--sr, -12deg) + 18deg)) scale(1.12); }
+  }
+
+  /* Glowing gradient border */
+  .video-glow-border {
+    position: absolute;
+    inset: -3px;
+    border-radius: 17px;
+    z-index: 1;
+    background: linear-gradient(45deg, #ff5078, #ffaacc, #ff5078, #c0306a, #ff5078);
+    background-size: 400% 400%;
+    animation: borderAnimate 3.5s linear infinite;
+  }
+  @keyframes borderAnimate {
+    0%,100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+
+  /* Floating hearts around video */
+  .video-hearts {
+    position: absolute;
+    inset: -40px;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .vheart {
+    position: absolute;
+    color: rgba(255,80,120,0.6);
+    font-size: var(--vs, 16px);
+    animation: vFloat var(--vd, 3s) var(--vdel, 0s) ease-in-out infinite;
+    opacity: 0;
+  }
+  @keyframes vFloat {
+    0%   { opacity: 0; transform: translateY(0) scale(0.4); }
+    30%  { opacity: 0.9; transform: translateY(-18px) scale(1); }
+    100% { opacity: 0; transform: translateY(-45px) scale(0.8); }
+  }
+
+  /* Video wrapper */
+  .video-wrapper {
+    position: relative;
+    z-index: 2;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 16 / 9;
+  }
+  .video-wrapper video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Video placeholder styling */
+  .video-placeholder {
+    width: 100%; height: 100%;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #10030a 0%, #030810 100%);
+    gap: 12px;
+    color: #555;
+    font-family: sans-serif;
+    font-size: 13px;
+    text-align: center;
+    padding: 2rem;
+  }
+  .video-placeholder .play-icon {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,80,120,0.7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    color: rgba(255,80,120,0.7);
+    margin-bottom: 10px;
+    animation: playPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes playPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,80,120,0.35); }
+    50%      { box-shadow: 0 0 0 18px rgba(255,80,120,0); }
+  }
+  .video-placeholder code {
+    font-size: 11px;
+    color: #444;
+    background: rgba(255,255,255,0.03);
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.05);
+    font-family: monospace;
+  }
+
+  /* Video caption */
+  .video-caption {
+    text-align: center;
+    margin-top: 2.2rem;
+    font-size: 1rem;
+    color: #888;
+    font-style: italic;
+    max-width: 540px;
+    line-height: 1.8;
+  }
+  .video-caption strong { color: #ff8099; font-style: normal; }
+
+  /* =============
+     RESPONSIVE
+  ============= */
+  @media (max-width: 480px) {
+    .heart-collage { width: 300px; height: 290px; }
+    .love-quotes   { grid-template-columns: 1fr; }
+    .music-player  { right: 10px; bottom: 10px; min-width: 190px; }
+    .video-frame-outer { max-width: 100%; }
+    .sticker { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- =====================
+     MUSIC PLAYER
+===================== -->
+<div class="music-player">
+  <div class="music-vinyl" id="vinyl"></div>
+  <div class="music-info">
+    <div class="music-title"  id="songTitle">Nama Lagu 1</div>
+    <div class="music-artist" id="songArtist">Nama Artis</div>
+  </div>
+  <button class="music-btn" id="prevBtn">&#8249;</button>
+  <button class="music-btn" id="playBtn">&#9654;</button>
+  <button class="music-btn" id="nextBtn">&#8250;</button>
+</div>
+<audio id="audioPlayer"></audio>
+
+<!-- =====================
+     SECTION 1 — HERO
+===================== -->
+<section id="section1">
+  <div class="stars"             id="stars"></div>
+  <div class="floating-hearts-bg" id="floatHearts"></div>
+  <div class="big-heart">&#9829;</div>
+
+  <div class="hero-content">
+    <!--
+      ╔══════════════════════════════════════╗
+      ║  EDIT AREA — SECTION 1              ║
+      ╚══════════════════════════════════════╝
+    -->
+    <p class="hero-tagline">Untuk kamu, Iya Kamu :></p>
+
+    <!-- Ganti nama/kata di bawah ini -->
+    <h1 class="hero-title">
+      Kamu adalah<br><span>Madu ku</span>
+    </h1>
+
+    <!-- Ganti pesan di bawah ini -->
+    <p class="hero-subtitle">
+      "when Nathfelix said: Jika harimu berat untuk dilewati.
+      Kamu bisa tidur satu harian untuk melewatinya."
+    </p>
+
+    <button class="hero-cta"
+      onclick="document.getElementById('section2').scrollIntoView({behavior:'smooth'})">
+      Lihat kenangan kita &#9829;
+    </button>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-arrow"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- =====================
+     SECTION 2 — GALLERY
+===================== -->
+<section id="section2">
+
+  <div class="section-header">
+    <p class="section-label">Momen bersama kita</p>
+    <!-- Ganti judul & kutipan di bawah ini -->
+    <h2 class="section-title">Foto-foto kita &#9829;</h2>
+    <p class="section-quote">
+      "Setiap foto menyimpan seribu kata yang tak bisa kuucapkan,
+      tapi hatiku selalu berbisik: aku milik kamu."
+    </p>
+  </div>
+
+  <!-- Heart-shape decoration -->
+  <div class="heart-clip-container">
+    <svg class="heart-deco-svg" viewBox="0 0 420 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path class="heart-deco-path"
+        d="M210 340 C150 295 40 235 40 145
+           C40 95 80 52 130 52
+           C160 52 186 68 210 95
+           C234 68 260 52 290 52
+           C340 52 380 95 380 145
+           C380 235 270 295 210 340Z"/>
+    </svg>
+
+    <!--
+      ╔══════════════════════════════════════╗
+      ║  EDIT AREA — FOTO (11 slot)         ║
+      ║                                      ║
+      ║  Cara pasang foto:                   ║
+      ║  Ganti <div class="ph">...</div>     ║
+      ║  dengan:                             ║
+      ║  <img src="foto-kamu.jpg" alt="..."> ║
+      ╚══════════════════════════════════════╝
+    -->
+    <div class="heart-collage">
+
+      <!-- Baris 1: Pundak kiri hati -->
+      <div class="heart-photo" style="width:105px;height:105px;left:30px;top:18px;--rot:-3deg;--fd:5.5s;--fdel:0s">
+        <img src="foto2.jpeg" alt="...">
+      </div>
+
+      <!-- Baris 1: Tengah atas -->
+      <div class="heart-photo" style="width:105px;height:105px;left:140px;top:0;--rot:2deg;--fd:6s;--fdel:0.4s">
+        <img src="Foto11.jpeg" alt="...">
+      </div>
+
+      <!-- Baris 1: Pundak kanan hati -->
+      <div class="heart-photo" style="width:105px;height:105px;left:250px;top:18px;--rot:-2deg;--fd:5s;--fdel:0.8s">
+        <img src="foto3.jpeg" alt="...">
+      </div>
+
+      <!-- Baris 2: Kiri lebar -->
+      <div class="heart-photo" style="width:88px;height:88px;left:0;top:130px;--rot:3deg;--fd:7s;--fdel:0.2s">
+        <img src="foto4.jpeg" alt="...">
+      </div>
+
+      <!-- Baris 2: Tengah-kiri -->
+      <div class="heart-photo" style="width:105px;height:105px;left:96px;top:118px;--rot:-1deg;--fd:6s;--fdel:0.6s">
+        <img src="Foto5.jpeg" alt="...">
+      </div>
+
+      <!-- Baris 2: Tengah-kanan -->
+      <div class="heart-photo" style="width:105px;height:105px;left:210px;top:118px;--rot:2deg;--fd:5.5s;--fdel:1s">
+        <img src="Foto6.jpeg" alt="...">
+      </div>
+
+      <!-- Baris 2: Kanan lebar -->
+      <div class="heart-photo" style="width:88px;height:88px;left:305px;top:130px;--rot:-3deg;--fd:6.5s;--fdel:0.3s">
+        <img src="foto7.jpeg" alt="...">
+      </div>
+
+      <!-- Baris 3: Menyempit -->
+      <div class="heart-photo" style="width:92px;height:92px;left:48px;top:228px;--rot:1deg;--fd:6s;--fdel:0.5s">
+        <img src="foto8.jpeg" alt="...">>
+      </div>
+
+      <!-- Baris 3: Tengah -->
+      <div class="heart-photo" style="width:92px;height:92px;left:150px;top:238px;--rot:-2deg;--fd:5s;--fdel:0.9s">
+        <img src="foto9.jpeg" alt="...">
+      </div>
+
+      <!-- Baris 3: Kanan -->
+      <div class="heart-photo" style="width:92px;height:92px;left:248px;top:228px;--rot:2deg;--fd:6.5s;--fdel:0.7s">
+        <img src="foto10.jpeg" alt="...">
+      </div>
+
+      <!-- Ujung hati (bawah) -->
+      <div class="heart-photo" style="width:82px;height:82px;left:152px;top:330px;--rot:-1deg;--fd:5.5s;--fdel:0.4s">
+        <img src="lastfoto.jpeg" alt="...">
+      </div>
+
+    </div><!-- /.heart-collage -->
+  </div><!-- /.heart-clip-container -->
+
+  <!--
+    ╔══════════════════════════════════════╗
+    ║  EDIT AREA — KATA-KATA              ║
+    ╚══════════════════════════════════════╝
+  -->
+  <div class="love-quotes">
+    <div class="quote-card">
+      <span class="quote-icon">💌</span>
+      <p class="quote-text">"semua bisa effort mendapatkan xioba, tapi tidak semua bisa memiliki nathfelix😏."</p>
+    </div>
+    <div class="quote-card">
+      <span class="quote-icon">✨</span>
+      <p class="quote-text">"satu kampus aja bisa seru,apalagi kalo satu rumah😜."</p>
+    </div>
+    <div class="quote-card">
+      <span class="quote-icon">🌙</span>
+      <p class="quote-text">"Jika waktu malam kamu terasa sunyi, kamu tinggal call me🤙."</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- =====================
+     SECTION 3 — VIDEO
+===================== -->
+<section id="section3">
+
+  <div class="video-section-header section-header">
+    <p class="section-label">Video Kita</p>
+    <!-- Ganti judul di bawah ini -->
+    <h2 class="section-title">Momen avv 💕</h2>
+  </div>
+
+  <div class="video-frame-outer">
+
+    <!-- Cute stickers (hiasan lucu) -->
+    <div class="sticker" style="top:-22px;left:-16px;--ss:34px;--ssd:2.2s;--ssdel:0s;--sr:-15deg">🌸</div>
+    <div class="sticker" style="top:-22px;right:-16px;--ss:30px;--ssd:2.6s;--ssdel:0.3s;--sr:10deg">⭐</div>
+    <div class="sticker" style="bottom:-22px;left:-16px;--ss:32px;--ssd:2s;--ssdel:0.6s;--sr:-8deg">🎀</div>
+    <div class="sticker" style="bottom:-22px;right:-16px;--ss:30px;--ssd:2.4s;--ssdel:0.9s;--sr:12deg">💫</div>
+    <div class="sticker" style="top:38%;left:-32px;--ss:26px;--ssd:1.9s;--ssdel:0.2s;--sr:-20deg">💖</div>
+    <div class="sticker" style="top:38%;right:-32px;--ss:26px;--ssd:2.1s;--ssdel:0.5s;--sr:15deg">🌺</div>
+    <div class="sticker" style="top:15%;left:-28px;--ss:22px;--ssd:2.3s;--ssdel:1s;--sr:5deg">🦋</div>
+    <div class="sticker" style="top:65%;right:-28px;--ss:22px;--ssd:2s;--ssdel:0.8s;--sr:-5deg">🌷</div>
+
+    <!-- Animated corner frames -->
+    <div class="frame-corner tl"><svg viewBox="0 0 60 60"><path class="corner-path" d="M54 6 L6 6 L6 54" style="animation-delay:0.1s"/></svg></div>
+    <div class="frame-corner tr"><svg viewBox="0 0 60 60"><path class="corner-path" d="M54 6 L6 6 L6 54" style="animation-delay:0.3s"/></svg></div>
+    <div class="frame-corner bl"><svg viewBox="0 0 60 60"><path class="corner-path" d="M54 6 L6 6 L6 54" style="animation-delay:0.5s"/></svg></div>
+    <div class="frame-corner br"><svg viewBox="0 0 60 60"><path class="corner-path" d="M54 6 L6 6 L6 54" style="animation-delay:0.7s"/></svg></div>
+
+    <!-- Floating hearts -->
+    <div class="video-hearts" id="videoHearts"></div>
+
+    <!-- Glowing border -->
+    <div class="video-glow-border"></div>
+
+    <!-- ╔══════════════════════════════════════╗
+         ║  EDIT AREA — VIDEO                  ║
+         ║                                      ║
+         ║  Ganti tag div.video-placeholder     ║
+         ║  dengan:                             ║
+         ║  <video src="video.mp4"              ║
+         ║    controls autoplay muted           ║
+         ║    style="width:100%;height:100%">   ║
+         ║  </video>                            ║
+         ╚══════════════════════════════════════╝ -->
+    <div class="video-wrapper">
+       <video src="VT2.mp4" controls autoplay muted  style="width:100%;height:100%">  </video> 
+        <div class="play-icon">&#9654;</div>
+        <p>Tempatkan video kamu di sini</p>
+        <code>&lt;video src="nama-video.mp4" controls&gt;&lt;/video&gt;</code>
+      </div>
+    </div>
+
+  </div><!-- /.video-frame-outer -->
+
+  <!--
+    ╔══════════════════════════════════════╗
+    ║  EDIT AREA — CAPTION VIDEO          ║
+    ╚══════════════════════════════════════╝
+  -->
+  <p class="video-caption">
+    "Ini adalah caraku bilang <strong>aku sayang kamu</strong> — bukan hanya dengan kata-kata,
+    tapi dengan seluruh hatiku. Teruslah bersemangat, karena kamu selalu punya aku di sisimu, MWAHHH 💕"
+  </p>
+
+</section>
+
+<!-- =====================
+     JAVASCRIPT
+===================== -->
+<script>
+/* =========================================
+   EDIT: Daftar lagu — ganti src, title, artist
+   Letakkan file .mp3 satu folder dengan HTML ini
+   ========================================= */
+const songs = [
+  { title: "Shape of My Heart", artist: "Backstreet Boys", src: "Backstreet Boys - Shape of My Heart (S1).mp3" },
+  { title: "You'll Be in My Heart", artist: "NIKi", src: "NIKI - You'll Be in My Heart (S2) ft. Phil Collins.mp3" },
+  
+];
+
+/* Music player logic */
+let currentIdx = 0;
+let isPlaying  = false;
+const audio     = document.getElementById('audioPlayer');
+const vinyl     = document.getElementById('vinyl');
+const playBtn   = document.getElementById('playBtn');
+const songTitle = document.getElementById('songTitle');
+const songArtist= document.getElementById('songArtist');
+
+function loadSong(idx) {
+  const s = songs[idx];
+  songTitle.textContent  = s.title;
+  songArtist.textContent = s.artist;
+  audio.src = s.src;
+}
+function setPlaying(state) {
+  isPlaying = state;
+  playBtn.innerHTML = state ? '&#9646;&#9646;' : '&#9654;';
+  vinyl.classList.toggle('playing', state);
+}
+playBtn.addEventListener('click', () => {
+  if (isPlaying) { audio.pause(); setPlaying(false); }
+  else           { audio.play().catch(() => {}); setPlaying(true); }
+});
+document.getElementById('prevBtn').addEventListener('click', () => {
+  currentIdx = (currentIdx - 1 + songs.length) % songs.length;
+  loadSong(currentIdx);
+  if (isPlaying) audio.play().catch(() => {});
+});
+document.getElementById('nextBtn').addEventListener('click', () => {
+  currentIdx = (currentIdx + 1) % songs.length;
+  loadSong(currentIdx);
+  if (isPlaying) audio.play().catch(() => {});
+});
+audio.addEventListener('ended', () => {
+  currentIdx = (currentIdx + 1) % songs.length;
+  loadSong(currentIdx);
+  audio.play().catch(() => {});
+});
+loadSong(0);
+
+/* Stars */
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 90; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.cssText =
+    `left:${Math.random()*100}%;top:${Math.random()*100}%;` +
+    `--d:${1.5 + Math.random()*4}s;--del:${Math.random()*4}s;` +
+    `width:${Math.random() < 0.3 ? 3 : 2}px;height:${Math.random() < 0.3 ? 3 : 2}px`;
+  starsEl.appendChild(s);
+}
+
+/* Floating hearts hero */
+const floatEl = document.getElementById('floatHearts');
+const sym = ['&#9829;','&#10084;','&#128149;','&#128151;','&#128150;','&#128157;'];
+for (let i = 0; i < 20; i++) {
+  const h = document.createElement('div');
+  h.className = 'fheart';
+  h.innerHTML = sym[Math.floor(Math.random() * sym.length)];
+  h.style.cssText =
+    `left:${Math.random()*100}%;` +
+    `--s:${10 + Math.random()*28}px;` +
+    `--d:${6 + Math.random()*9}s;` +
+    `--delay:${Math.random()*9}s`;
+  floatEl.appendChild(h);
+}
+
+/* Floating hearts video */
+const vhEl = document.getElementById('videoHearts');
+const vPos = [
+  {top:'8%',left:'0'},    {top:'28%',left:'-1%'}, {top:'55%',left:'0'},
+  {top:'75%',left:'1%'}, {top:'8%',right:'0'},    {top:'35%',right:'-1%'},
+  {top:'60%',right:'0'}, {top:'80%',right:'1%'},
+  {top:'-3%',left:'18%'},{top:'-3%',left:'45%'},{top:'-3%',left:'72%'},
+  {bottom:'-3%',left:'18%'},{bottom:'-3%',left:'45%'},{bottom:'-3%',left:'72%'},
+];
+vPos.forEach((pos, i) => {
+  const h  = document.createElement('div');
+  h.className = 'vheart';
+  h.innerHTML = '&#9829;';
+  const ps = Object.entries(pos).map(([k,v]) => `${k}:${v}`).join(';');
+  h.style.cssText = `${ps};--vs:${11+Math.random()*10}px;--vd:${1.8+Math.random()*2.2}s;--vdel:${i*0.38}s`;
+  vhEl.appendChild(h);
+});
+</script>
+</body>
+</html>
